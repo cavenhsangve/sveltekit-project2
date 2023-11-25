@@ -1,6 +1,6 @@
 <script>
     import "../app.css";
-  </script>
+</script>
   
 <slot />
 
@@ -9,6 +9,7 @@
         padding: 2rem;
         background-color: rgb(0, 35, 48);
         font-family: Arial, Helvetica, sans-serif;
+        color: aliceblue;
     }
 
     :global(input, button) {
