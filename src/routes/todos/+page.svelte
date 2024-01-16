@@ -1,37 +1,77 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
     import type { PageData } from './$types';
+
+    type Data = {
+    success: boolean
+    errors: Record<string, string>
+}
     
     export let data: PageData;
 
-    // todo
-    async function addTodo(event: Event) {}
+    let form: Data
 
     // todo
-    async function removeTodo(event: Event) {}
+    async function addTodo(event: Event) {
+        const formEl = event.target as HTMLFormElement
+        const data = new FormData(formEl)
+
+        const response = await fetch(formEl.action, {
+            method: 'POST',
+            body: data
+        })
+
+        const responseData = await response.json()
+
+        form = responseData
+
+        formEl.reset()
+
+        await invalidateAll()
+    }
+
+    // todo
+    async function removeTodo(event: Event) {
+        const formEl = event.target as HTMLFormElement
+        const data = new FormData(formEl)
+
+        const response = await fetch(formEl.action, {
+            method: 'DELETE',
+            body: data
+        })
+        await invalidateAll()
+    }
 </script>
 
 <pre>
     {JSON.stringify(data, null, 2)}
 </pre>
 
-<ul>
+<ul class="p-0">
     {#each data.todos as todo}
-        <li>
-            <span>{todo.text}</span>
+        <li class="flex justify-between items-center space-y-8">
+            <span class="capitalize">{todo.text}</span>
             <form on:submit|preventDefault={removeTodo} method="POST">
                 <input type="hidden" name="id" value={todo.id}>
-                <button class="delete delete-blue" type="submit">Delete</button>
+                <button class="font-bold py-1 px-2 rounded bg-blue-500 hover:bg-blue-400" type="submit">Delete</button>
             </form>
         </li>
     {/each}
 </ul>
 
-<form on:submit|preventDefault={addTodo} method="POST">
-    <input class="submit-box"type="text" name="todo" />
-    <button class="submit-btn" type="submit">+ Add Todo</button>
+<form on:submit|preventDefault={addTodo} method="POST" class="mt-10 space-y-2">
+    <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" type="text" name="todo" />
+    <button class="shadow bg-blue-500 hover:bg-blue-400 focus:shadow-outline focus:outline-none font-bold py-2 px-4 rounded w-full" type="submit">+ Add Todo</button>
+    {#if form?.errors?.todo}
+        <p class="error text-red-700">This field is required</p>
+    {/if}
 </form>
 
-<style>
+{#if form?.success}
+    <p>Added todo!</p>
+{/if}
+
+<!-- <style>
     ul {
         padding: 0;
     }
@@ -65,4 +105,4 @@
     .error {
         color: tomato;
     }
-</style>
+</style> -->
