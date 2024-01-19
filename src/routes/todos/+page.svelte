@@ -1,46 +1,10 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-    import type { PageData } from './$types';
-
-    type Data = {
-    success: boolean
-    errors: Record<string, string>
-}
+    import type { ActionData, PageData } from './$types';
     
     export let data: PageData;
-
-    let form: Data
-
-    // todo
-    async function addTodo(event: Event) {
-        const formEl = event.target as HTMLFormElement
-        const data = new FormData(formEl)
-
-        const response = await fetch(formEl.action, {
-            method: 'POST',
-            body: data
-        })
-
-        const responseData = await response.json()
-
-        form = responseData
-
-        formEl.reset()
-
-        await invalidateAll()
-    }
-
-    // todo
-    async function removeTodo(event: Event) {
-        const formEl = event.target as HTMLFormElement
-        const data = new FormData(formEl)
-
-        const response = await fetch(formEl.action, {
-            method: 'DELETE',
-            body: data
-        })
-        await invalidateAll()
-    }
+    export let form: ActionData
 </script>
 
 <pre>
@@ -51,7 +15,7 @@
     {#each data.todos as todo}
         <li class="flex justify-between items-center space-y-8">
             <span class="capitalize">{todo.text}</span>
-            <form on:submit|preventDefault={removeTodo} method="POST">
+            <form method="POST" action="?/removeTodo" use:enhance>
                 <input type="hidden" name="id" value={todo.id}>
                 <button class="font-bold py-1 px-2 rounded bg-blue-500 hover:bg-blue-400" type="submit">Delete</button>
             </form>
@@ -59,12 +23,13 @@
     {/each}
 </ul>
 
-<form on:submit|preventDefault={addTodo} method="POST" class="mt-10 space-y-2">
+<form method="POST" action="?/addTodo" use:enhance class="mt-10 space-y-2">
     <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" type="text" name="todo" />
-    <button class="shadow bg-blue-500 hover:bg-blue-400 focus:shadow-outline focus:outline-none font-bold py-2 px-4 rounded w-full" type="submit">+ Add Todo</button>
-    {#if form?.errors?.todo}
+    {#if form?.missing}
         <p class="error text-red-700">This field is required</p>
     {/if}
+    <button class="shadow bg-blue-500 hover:bg-blue-400 focus:shadow-outline focus:outline-none font-bold py-2 px-4 rounded w-full" type="submit">+ Add Todo</button>
+    <button formaction="?/clearTodos" class="shadow bg-slate-500 hover:bg-blue-400 focus:shadow-outline focus:outline-none font-bold py-2 px-4 rounded w-full" type="submit">Clear</button>
 </form>
 
 {#if form?.success}
